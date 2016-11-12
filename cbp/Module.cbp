@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Module" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Win32 Debug Dynamic">
+				<Option platforms="Windows;" />
+				<Option output="../bin/sqlite-win32" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/win32-d/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-DWIN" />
+					<Add option="-D_WIN" />
+					<Add option="-DWIN32" />
+					<Add option="-D_WIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DRELEASE" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-static" />
+					<Add library="sqlite" />
+					<Add directory="../lib/mingw32" />
+				</Linker>
+			</Target>
+			<Target title="Win32 Release Dynamic">
+				<Option platforms="Windows;" />
+				<Option output="../bin/sqlite-win32" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/win32/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-DWIN" />
+					<Add option="-D_WIN" />
+					<Add option="-DWIN32" />
+					<Add option="-D_WIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DRELEASE" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-static" />
+					<Add library="sqlite" />
+					<Add directory="../lib/mingw32" />
+				</Linker>
+			</Target>
+			<Target title="Win64 Debug Dynamic">
+				<Option platforms="Windows;" />
+				<Option output="../bin/sqlite-win64" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/win64-d/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-DWIN" />
+					<Add option="-D_WIN" />
+					<Add option="-DWIN64" />
+					<Add option="-D_WIN64" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DRELEASE" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-D_SQ64" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-static" />
+					<Add library="sqlite" />
+					<Add directory="../lib/mingw64" />
+				</Linker>
+			</Target>
+			<Target title="Win64 Release Dynamic">
+				<Option platforms="Windows;" />
+				<Option output="../bin/sqlite-win64" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/win64/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-DWIN" />
+					<Add option="-D_WIN" />
+					<Add option="-DWIN64" />
+					<Add option="-D_WIN64" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DRELEASE" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-D_SQ64" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-static" />
+					<Add library="sqlite" />
+					<Add directory="../lib/mingw64" />
+				</Linker>
+			</Target>
+			<Target title="Linux32 Debug Dynamic">
+				<Option platforms="Unix;" />
+				<Option output="../bin/sqlite-linux32" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/linux32-d/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-fPIC" />
+					<Add option="-Dlinux" />
+					<Add option="-D__linux" />
+					<Add option="-DDEBUG" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add option="-Bstatic" />
+					<Add library="sqlite-d" />
+					<Add directory="../lib/gcc32" />
+				</Linker>
+			</Target>
+			<Target title="Linux32 Release Dynamic">
+				<Option platforms="Unix;" />
+				<Option output="../bin/sqlite-linux32" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/linux32/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-fPIC" />
+					<Add option="-Dlinux" />
+					<Add option="-D__linux" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DRELEASE" />
+					<Add option="-D_CONSOLE" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-Bstatic" />
+					<Add library="sqlite" />
+					<Add directory="../lib/gcc32" />
+				</Linker>
+			</Target>
+			<Target title="Linux64 Debug Dynamic">
+				<Option platforms="Unix;" />
+				<Option output="../bin/sqlite-linux64" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/linux64-d/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-fPIC" />
+					<Add option="-Dlinux" />
+					<Add option="-D__linux" />
+					<Add option="-DDEBUG" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-D_SQ64" />
+				</Compiler>
+				<Linker>
+					<Add option="-Bstatic" />
+					<Add library="sqlite-d" />
+					<Add directory="../lib/gcc64" />
+				</Linker>
+			</Target>
+			<Target title="Linux64 Release Dynamic">
+				<Option platforms="Unix;" />
+				<Option output="../bin/sqlite-linux64" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option object_output="../obj/linux64/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-enable-static" />
+					<Add option="-fPIC" />
+					<Add option="-Dlinux" />
+					<Add option="-D__linux" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DRELEASE" />
+					<Add option="-D_CONSOLE" />
+					<Add option="-D_SQ64" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-Bstatic" />
+					<Add library="sqlite" />
+					<Add directory="../lib/gcc64" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++11" />
+			<Add option="-DSQLITE_ENABLE_FTS3" />
+			<Add option="-DSQLITE_ENABLE_FTS4" />
+			<Add option="-DSQLITE_ENABLE_FTS5" />
+			<Add option="-DSQLITE_ENABLE_JSON1" />
+			<Add option="-DSQLITE_OMIT_LOAD_EXTENSION" />
+			<Add directory="../include" />
+			<Add directory="../source" />
+		</Compiler>
+		<Unit filename="../source/Functions.cpp" />
+		<Unit filename="../source/Functions.h" />
+		<Unit filename="../source/main.cpp" />
+		<Unit filename="../source/main.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
