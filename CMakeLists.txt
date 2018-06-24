@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(VCMP_SQLite)
 
-option(BUILTIN_RUNTIMES "Include the MinGW runtime into the binary itself." TRUE)
+option(BUILTIN_RUNTIMES "Include the MinGW runtime into the binary itself." ON)
+option(FORCE_32BIT_BIN "Create a 32-bit executable binary if the compiler defaults to 64-bit." OFF)
 
 # default to c++11 standard
 set(CMAKE_CXX_STANDARD 11)
@@ -9,7 +10,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BUILD_TYPE "Release")
 # include mingw runntime into the binary
 if (GCC OR MINGW)
-	if(BUILTIN_RUNTIMES EQUAL TRUE)
+	if(BUILTIN_RUNTIMES)
 		set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 	endif()
 endif()

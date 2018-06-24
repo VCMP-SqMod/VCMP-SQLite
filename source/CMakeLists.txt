@@ -1,5 +1,9 @@
 add_library(SQLiteMod MODULE main.cpp Functions.cpp)
 
+if(FORCE_32BIT_BIN)
+	set_target_properties(SQLiteMod PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+endif()
+
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	target_compile_definitions(SQLiteMod PRIVATE _SQ64)
 endif()

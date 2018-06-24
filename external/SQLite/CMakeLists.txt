@@ -1,3 +1,9 @@
 add_library(SQLite STATIC sqlite3.c)
+
 target_include_directories(SQLite PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
 target_compile_definitions(SQLite PRIVATE SQLITE_ENABLE_FTS3=1 SQLITE_ENABLE_FTS4=1 SQLITE_ENABLE_FTS5=1 SQLITE_ENABLE_JSON1=1 SQLITE_ENABLE_RTREE=1)
+
+if(FORCE_32BIT_BIN)
+	set_target_properties(SQLite PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+endif()
