@@ -14,6 +14,10 @@ if (GCC OR MINGW)
 		set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 	endif()
 endif()
+# enable position independent code
+if (UNIX)
+	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
