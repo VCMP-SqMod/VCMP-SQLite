@@ -1,7 +1,7 @@
-#include "main.h"
-#include "sqlite3.h"
-#include "SQModule.h"
 #pragma once
+
+#include "main.h"
+#include "SQModule.h"
 
 extern HSQUIRRELVM v;
 

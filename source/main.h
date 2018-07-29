@@ -1,3 +1,5 @@
+#pragma once
+
 #if defined(_MSC_VER)
 	#define SQMOD_API_EXPORT	extern "C" __declspec(dllexport)
 #elif defined(__GNUC__)

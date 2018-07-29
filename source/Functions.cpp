@@ -1,5 +1,6 @@
 #include "Functions.h"
 #include "squirrel.h"
+#include "sqlite3.h"
 
 #define SQMD_SUCCESS 0
 #define SQMD_FAILURE 1
