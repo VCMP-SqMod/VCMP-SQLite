@@ -438,7 +438,7 @@ SQInteger SQLite_Open(HSQUIRRELVM vm)
 {
 	// Get the number of arguments given to the function call
 	SQInteger argc = sq->gettop(vm);
-	
+
 	// Initialize the default values required to open a database
 	SQInteger flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 	const SQChar * path = NULL;
@@ -493,7 +493,7 @@ SQInteger SQLite_Open(HSQUIRRELVM vm)
 		// Return the value returned by the previous exception
 		return res;
 	}
-	
+
 	// Push the connection handle on the stack
 	sq->pushuserpointer(vm, dhandle);
 	// Specify that we have value returned on the stack
@@ -566,7 +566,7 @@ SQInteger SQLite_Query(HSQUIRRELVM vm)
 
 	// Temporary variable for the retrieved query string
 	const SQChar * query;
-	
+
 	// Attempt to get the query string from the stack
 	if (SQ_FAILED(sq->getstring(vm, 3, &query))) {
 		return sq->throwerror(vm, "Unable to retrieve any value from the second argument");
@@ -824,28 +824,59 @@ SQInteger SQLite_ColumnData(HSQUIRRELVM vm)
 	}
 
 	// Temporary variable for the retrieved column index
-	SQInteger column;
+	int colnum = sqlite3_column_count(shandle), column = -1;
 
 	// Attempt to retrieve the column index from the stack
-	if (SQ_FAILED(sq->getinteger(vm, 3, &column))) {
-		return sq->throwerror(vm, "Unable to retrieve a value from the second argument");
-	// See if the specified column index is valid
-	} else if(column < 0) {
-		return sq->throwerror(vm, "Invalid column index was specified");
+	switch (sq->gettype(vm, 3)) {
+		case OT_INTEGER:
+		case OT_FLOAT: {
+			SQInteger i;
+			sq->getinteger(vm, 3, &i); // This cannot fail (technically)
+			column = static_cast< int >(i);
+		} break;
+		case OT_STRING: {
+			const SQChar * str;
+			sq->getstring(vm, 3, &str);
+			if (str[0] == '\0') {
+				return sq->throwerror(vm, "An empty string cannot represent a valid column index");
+			}
+			for (int i = 0; i < colnum; ++i)
+			{
+				// Attempt to obtain the column name
+				const SQChar * name = sqlite3_column_name(shandle, i);
+				// See if this column name is a match
+				if (name && sqlite3_stricmp(str, name) == 0) {
+					column = i;
+					break;
+				}
+			}
+		} break;
+		default: {
+			return sq->throwerror(vm, "Invalid value type was given as column index");
+		}
 	}
-
+	// See if the specified column index is valid
+	if(column < 0) {
+		return sq->throwerror(vm, "An invalid column index was specified");
+	} else if (column >= colnum) {
+		return sq->throwerror(vm, "An out of range column index was specified");
+	}
 	// Attempt to retrieve the value from the result set
-	switch(sqlite3_column_type(shandle, static_cast<int>(column)))
+	switch(sqlite3_column_type(shandle, column))
 	{
 		case SQLITE_INTEGER:
-			sq->pushinteger(vm, (SQInteger)sqlite3_column_int(shandle, static_cast<int>(column)));
+#ifdef _SQ64
+			sq->pushinteger(vm, sqlite3_column_int64(shandle, column));
+#else
+			sq->pushinteger(vm, sqlite3_column_int(shandle, column));
+#endif
 		break;
 		case SQLITE_FLOAT:
-			sq->pushfloat(vm, (SQFloat)sqlite3_column_double(shandle, static_cast<int>(column)));
+			sq->pushfloat(vm, static_cast< SQFloat >(sqlite3_column_double(shandle, column)));
 		break;
 		case SQLITE_TEXT:
 		case SQLITE_BLOB:
-			sq->pushstring(vm, (SQChar *)sqlite3_column_text(shandle, static_cast<int>(column)), -1);
+			sq->pushstring(vm, reinterpret_cast< const SQChar * >(sqlite3_column_text(shandle, column)), sqlite3_column_bytes(shandle, column));
 		break;
 		default: sq->pushnull(vm);
 	}
@@ -1080,6 +1111,125 @@ SQInteger SQLite_Escape(HSQUIRRELVM vm)
 	return sq->throwerror(vm, _SC("Unable to escape the specified string"));
 }
 
+SQInteger SQLite_RowAsTable(HSQUIRRELVM vm)
+{
+	// See if any argument was given to the function call
+	if (sq->gettop(vm) < 2) {
+		return sq->throwerror(vm, "Function needs at least the statement handle argument");
+	}
+
+	// Temporary variable for the retrieved statement handle
+	sqlite3_stmt * shandle;
+	const SQChar * msg = NULL;
+
+	// Now retrieve the database handle from the specified arguments
+	if (FetchStatementHandle(vm, 2, shandle, msg) != SQMD_SUCCESS) {
+		return sq->throwerror(vm, msg);
+	}
+	// Retrieve the number of columns that must be iterated.
+	int colnum = sqlite3_column_count(shandle);
+
+	// Create an empty table on the stack
+	sq->newtable(vm);
+
+	// Iterate over the selected columns
+	for (int column = 0; column < colnum; ++column)
+	{
+		// Attempt to obtain the column name
+		const SQChar * name = sqlite3_column_name(shandle, column);
+		// Validate the obtained name
+		if (!name) {
+			sq->pop(vm, 1); // Pop the table
+			return sq->throwerror(vm, "Unable to retrieve the name of one of the columns");
+		}
+		// Push the name of the column on the stack
+		sq->pushstring(vm, name, -1);
+		// Attempt to retrieve the value from the result set
+		switch(sqlite3_column_type(shandle, column))
+		{
+			case SQLITE_INTEGER:
+	#ifdef _SQ64
+				sq->pushinteger(vm, sqlite3_column_int64(shandle, column));
+	#else
+				sq->pushinteger(vm, sqlite3_column_int(shandle, column));
+	#endif
+			break;
+			case SQLITE_FLOAT:
+				sq->pushfloat(vm, static_cast< SQFloat >(sqlite3_column_double(shandle, column)));
+			break;
+			case SQLITE_TEXT:
+			case SQLITE_BLOB:
+				sq->pushstring(vm, reinterpret_cast< const SQChar * >(sqlite3_column_text(shandle, column)), sqlite3_column_bytes(shandle, column));
+			break;
+			default: sq->pushnull(vm);
+		}
+		// Attempt to insert the element in the table
+		if (SQ_FAILED(sq->newslot(vm, -3, false))) {
+			sq->pop(vm, 1); // Pop the table
+			return sq->throwerror(vm, "Unable to insert value in the table");
+		}
+	}
+
+	// Specify that we have a value on the stack that we returned
+	return 1;
+}
+
+SQInteger SQLite_RowAsArray(HSQUIRRELVM vm)
+{
+	// See if any argument was given to the function call
+	if (sq->gettop(vm) < 2) {
+		return sq->throwerror(vm, "Function needs at least the statement handle argument");
+	}
+
+	// Temporary variable for the retrieved statement handle
+	sqlite3_stmt * shandle;
+	const SQChar * msg = NULL;
+
+	// Now retrieve the database handle from the specified arguments
+	if (FetchStatementHandle(vm, 2, shandle, msg) != SQMD_SUCCESS) {
+		return sq->throwerror(vm, msg);
+	}
+	// Retrieve the number of columns that must be iterated.
+	int colnum = sqlite3_column_count(shandle);
+
+	// Create an empty array on the stack
+	sq->newarray(vm, colnum);
+
+	// Iterate over the selected columns
+	for (int column = 0; column < colnum; ++column)
+	{
+		// Push the name of the column on the stack
+		sq->pushinteger(vm, column);
+		// Attempt to retrieve the value from the result set
+		switch(sqlite3_column_type(shandle, column))
+		{
+			case SQLITE_INTEGER:
+	#ifdef _SQ64
+				sq->pushinteger(vm, sqlite3_column_int64(shandle, column));
+	#else
+				sq->pushinteger(vm, sqlite3_column_int(shandle, column));
+	#endif
+			break;
+			case SQLITE_FLOAT:
+				sq->pushfloat(vm, static_cast< SQFloat >(sqlite3_column_double(shandle, column)));
+			break;
+			case SQLITE_TEXT:
+			case SQLITE_BLOB:
+				sq->pushstring(vm, reinterpret_cast< const SQChar * >(sqlite3_column_text(shandle, column)), sqlite3_column_bytes(shandle, column));
+			break;
+			default: sq->pushnull(vm);
+		}
+		// Attempt to insert the element in the array
+		if (SQ_FAILED(sq->set(vm, -3))) {
+			sq->pop(vm, 1); // Pop the array
+			return sq->throwerror(vm, "Unable to insert value in the array");
+		}
+	}
+
+	// Specify that we have a value on the stack that we returned
+	return 1;
+}
+
 void RegisterFuncs(HSQUIRRELVM vm)
 {
 	RegisterConstants(vm);
@@ -1093,7 +1243,7 @@ void RegisterFuncs(HSQUIRRELVM vm)
 	RegisterSquirrelFunc(vm, SQLite_ErrStr, "SQLite_ErrStr", 1, "i");
 	RegisterSquirrelFunc(vm, SQLite_ToggleExtendedErrCode, "SQLite_ToggleExtendedErrCode", 2, "pb");
 	RegisterSquirrelFunc(vm, SQLite_NextRow, "SQLite_NextRow", 1, "p");
-	RegisterSquirrelFunc(vm, SQLite_ColumnData, "SQLite_ColumnData", 2, "pi");
+	RegisterSquirrelFunc(vm, SQLite_ColumnData, "SQLite_ColumnData", 2, "pi|f|s");
 	RegisterSquirrelFunc(vm, SQLite_ColumnCount, "SQLite_ColumnCount", 1, "p");
 	RegisterSquirrelFunc(vm, SQLite_ColumnName, "SQLite_ColumnName", 2, "pi");
 	RegisterSquirrelFunc(vm, SQLite_ColumnDecltype, "SQLite_ColumnDecltype", 2, "pi");
@@ -1101,6 +1251,8 @@ void RegisterFuncs(HSQUIRRELVM vm)
 	RegisterSquirrelFunc(vm, SQLite_Reset, "SQLite_Reset", 1, "p");
 	RegisterSquirrelFunc(vm, SQLite_Release, "SQLite_Release", 1, "p");
 	RegisterSquirrelFunc(vm, SQLite_Escape, "SQLite_Escape", 1, "s");
+	RegisterSquirrelFunc(vm, SQLite_RowAsTable, "SQLite_RowAsTable", 1, "p");
+	RegisterSquirrelFunc(vm, SQLite_RowAsArray, "SQLite_RowAsArray", 1, "p");
 
 	// Make it compatible with official version
 	RegisterSquirrelFunc(vm, SQLite_Open, "ConnectSQL", 0, NULL);
@@ -1108,7 +1260,9 @@ void RegisterFuncs(HSQUIRRELVM vm)
 	RegisterSquirrelFunc(vm, SQLite_Query, "QuerySQL", 2, "ps");
 	RegisterSquirrelFunc(vm, SQLite_NextRow, "GetSQLNextRow", 1, "p");
 	RegisterSquirrelFunc(vm, SQLite_ColumnCount, "GetSQLColumnCount", 1, "p");
-	RegisterSquirrelFunc(vm, SQLite_ColumnData, "GetSQLColumnData", 2, "pi");
+	RegisterSquirrelFunc(vm, SQLite_ColumnData, "GetSQLColumnData", 2, "pi|f|s");
 	RegisterSquirrelFunc(vm, SQLite_Release, "FreeSQLQuery", 1, "p");
 	RegisterSquirrelFunc(vm, SQLite_Escape, "escapeSQLString", 1, "s");
+	RegisterSquirrelFunc(vm, SQLite_RowAsTable, "GetSQLColumnTable", 1, "p");
+	RegisterSquirrelFunc(vm, SQLite_RowAsArray, "GetSQLColumnArray", 1, "p");
 }
